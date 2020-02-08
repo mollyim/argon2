@@ -15,8 +15,10 @@ android {
         targetCompatibility = 1.8
     }
 
-    sourceSets {
-        main.jniLibs.srcDirs = ['libs']
+    externalNativeBuild {
+        ndkBuild {
+            path file("jni/Android.mk")
+        }
     }
 }
 
