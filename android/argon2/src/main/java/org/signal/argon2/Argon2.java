@@ -9,6 +9,7 @@ public final class Argon2 {
   private final int     mCostKiB;
   private final int     parallelism;
   private final int     hashLength;
+  private final boolean hashRaw;
   private final Type    type;
   private final Version version;
 
@@ -17,6 +18,7 @@ public final class Argon2 {
     this.mCostKiB        = builder.mCostKiB;
     this.parallelism     = builder.parallelism;
     this.hashLength      = builder.hashLength;
+    this.hashRaw         = builder.hashRaw;
     this.type            = builder.type;
     this.version         = builder.version;
   }
@@ -52,6 +54,7 @@ public final class Argon2 {
     private int  mCostKiB        = 1 << 12;
     private int  parallelism     = 1;
     private int  hashLength      = 32;
+    private boolean hashRaw      = false;
     private Type type            = Type.Argon2i;
 
     public Builder(Version version) {
@@ -118,6 +121,14 @@ public final class Argon2 {
       return this;
     }
 
+    /**
+     * Generate binary-only hash, default false.
+     */
+    public Builder hashRaw(boolean hashRaw) {
+      this.hashRaw = hashRaw;
+      return this;
+    }
+
     public Argon2 build() {
       return new Argon2(this);
     }
@@ -127,25 +138,26 @@ public final class Argon2 {
     if (salt     == null) throw new IllegalArgumentException();
     if (password == null) throw new IllegalArgumentException();
 
-    StringBuffer encoded               = new StringBuffer();
-    byte[]       hash                  = new byte[hashLength];
-    byte[]       defensivePasswordCopy = password.clone();
+    StringBuffer encoded = hashRaw ? null : new StringBuffer();
+
+    byte[] hash         = new byte[hashLength];
+    byte[] passwordCopy = password.clone();
 
     int result = Argon2Native.hash(tCostIterations, mCostKiB, parallelism,
-                                   defensivePasswordCopy,
+                                   passwordCopy,
                                    salt,
                                    hash,
                                    encoded,
                                    type.nativeValue,
                                    version.nativeValue);
 
-    Arrays.fill(defensivePasswordCopy, (byte) 0);
+    Arrays.fill(passwordCopy, (byte) 0);
 
     if (result != Argon2Native.OK) {
       throw new Argon2Exception(result, Argon2Native.resultToString(result));
     }
 
-    return new Result(encoded.toString(), hash);
+    return new Result(hashRaw ? null : encoded.toString(), hash);
   }
 
   public final class Result {
