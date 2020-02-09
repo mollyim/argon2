@@ -1,5 +1,6 @@
 package org.signal.argon2;
 
+import java.util.Arrays;
 import java.util.Locale;
 
 public final class Argon2 {
@@ -37,7 +38,11 @@ public final class Argon2 {
 
     byte[] defensivePasswordCopy = password.clone();
 
-    return Argon2Native.verify(encoded, defensivePasswordCopy, type.nativeValue) == Argon2Native.OK;
+    int result = Argon2Native.verify(encoded, defensivePasswordCopy, type.nativeValue);
+
+    Arrays.fill(defensivePasswordCopy, (byte) 0);
+
+    return result == Argon2Native.OK;
   }
 
   public static class Builder {
@@ -125,15 +130,16 @@ public final class Argon2 {
     StringBuffer encoded               = new StringBuffer();
     byte[]       hash                  = new byte[hashLength];
     byte[]       defensivePasswordCopy = password.clone();
-    byte[]       defensiveSaltCopy     = salt.clone();
 
     int result = Argon2Native.hash(tCostIterations, mCostKiB, parallelism,
                                    defensivePasswordCopy,
-                                   defensiveSaltCopy,
+                                   salt,
                                    hash,
                                    encoded,
                                    type.nativeValue,
                                    version.nativeValue);
+
+    Arrays.fill(defensivePasswordCopy, (byte) 0);
 
     if (result != Argon2Native.OK) {
       throw new Argon2Exception(result, Argon2Native.resultToString(result));
