@@ -7,6 +7,10 @@ public final class MemoryCost {
 
   private final int kib;
 
+  public static MemoryCost Bytes(long bytes) {
+    return new MemoryCost((int)(bytes / 1024));
+  }
+
   public static MemoryCost KiB(int kib) {
     return new MemoryCost(kib);
   }
