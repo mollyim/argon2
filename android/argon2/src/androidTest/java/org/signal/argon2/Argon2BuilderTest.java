@@ -16,11 +16,29 @@ import static org.signal.argon2.Type.Argon2id;
 public final class Argon2BuilderTest {
 
   @Test
-  public void memory_too_low() {
+  public void memory_negative() {
     Argon2.Builder builder = new Argon2.Builder(Version.LATEST)
                                        .type(Argon2id);
 
     assertThatThrownBy(() -> builder.memoryCostKiB(-1))
+      .isExactlyInstanceOf(IllegalArgumentException.class);
+  }
+
+  @Test
+  public void memory_too_low() {
+    Argon2.Builder builder = new Argon2.Builder(Version.LATEST)
+                                       .type(Argon2id);
+
+    assertThatThrownBy(() -> builder.memoryCostKiB(7))
+      .isExactlyInstanceOf(IllegalArgumentException.class);
+
+  }
+
+  @Test
+  public void memory_too_low_for_parallelism() {
+    Argon2.Builder builder = new Argon2.Builder(Version.LATEST)
+                                       .type(Argon2id);
+    assertThatThrownBy(() -> builder.memoryCostKiB(8).parallelism(2).build())
       .isExactlyInstanceOf(IllegalArgumentException.class);
   }
 

@@ -223,18 +223,6 @@ public final class Argon2Test {
   }
 
   @Test
-  public void memory_too_little() {
-    Argon2 argon2 = new Argon2.Builder(Version.LATEST)
-                              .type(Argon2id)
-                              .memoryCostOrder(2)
-                              .build();
-
-    assertThatThrownBy(() -> argon2.hash(ascii("password"), ascii("diffsalt")))
-      .isExactlyInstanceOf(Argon2Exception.class)
-      .hasMessageContaining("Memory cost is too small");
-  }
-
-  @Test
   public void salt_too_short() {
     Argon2 argon2 = new Argon2.Builder(Version.LATEST)
                               .type(Argon2id)

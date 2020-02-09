@@ -92,8 +92,7 @@ public final class Argon2 {
      * Sets the memory usage of {@param kib} KiB.
      */
     public Builder memoryCostKiB(int kib) {
-      if (kib      < 4) throw new IllegalArgumentException("kib too small, minimum 4");
-      if (kib % 4 != 0) throw new IllegalArgumentException("kib must be multiple of 4");
+      if (kib < 8) throw new IllegalArgumentException("kib too small, minimum 8");
       this.mCostKiB = kib;
       return this;
     }
@@ -130,6 +129,7 @@ public final class Argon2 {
     }
 
     public Argon2 build() {
+      if (mCostKiB < (8 * parallelism)) throw new IllegalArgumentException("memory cost too small for given value of parallelism");
       return new Argon2(this);
     }
   }
